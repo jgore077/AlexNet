@@ -46,7 +46,7 @@ if __name__=="__main__":
     cnn.to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(cnn.parameters(), lr=LEARNING_RATE, momentum=0.9)
+    optimizer = optim.Adam(cnn.parameters(), lr=LEARNING_RATE, momentum=0.9)
 
     # Set model to train mode
     cnn.train()
