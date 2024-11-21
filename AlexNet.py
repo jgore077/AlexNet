@@ -28,7 +28,7 @@ class AlexNet(nn.Module):
         x=F.relu(self.conv4(x))
         x=F.relu(self.conv5(x))
         x=F.relu(self.max_pool3(x))
-        x=flatten(x)
+        x = x.view(-1, 256*6*6)
         x=F.relu(self.fc1(x))
         x=F.relu(self.dropout1(x))
         x=F.relu(self.fc2(x))
