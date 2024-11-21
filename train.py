@@ -51,8 +51,6 @@ if __name__=="__main__":
     cnn.train()
     
     for epoch in range(EPOCH):  # loop over the dataset multiple times
-
-        running_loss = 0.0
         for i, data in enumerate(tqdm(trainloader), 0):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = data
@@ -69,22 +67,36 @@ if __name__=="__main__":
             loss.backward()
             optimizer.step()
 
-            # print statistics
-            running_loss += loss.item()
-            if i % 2000 == 1999:    # print every 2000 mini-batches
-                print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
-                running_loss = 0.0
-                torch.save({
-                    'epoch':epoch,
-                    'model_state_dict':cnn.state_dict(),
-                    'optimizer_state_dict':optimizer.state_dict(),
-                    'loss':loss,
-                },f"{MODEL_FOLDER}/e{epoch}_b{i}.pt")
+        print(f"Testing model at epoch {epoch+1}")
+        # Set model to evaluation mode
+        cnn.eval()
+        # Do testing without gradient descent
+        with torch.no_grad():
+            val_loss = 0.0
+            correct = 0
+            total = 0
+            for inputs,labels in testloader:
+                # Move inputs and labels to gpu
+                inputs, labels =inputs.to(device),labels.to(device)
+                outputs = cnn(inputs)
+                val_loss += criterion(outputs, labels).item()
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+                
+        # Compute accuracy
+        accuracy=100 * correct / total
+        
+        # Print accuracy at epoch
+        print(f'Epoch {epoch+1}: Accuracy: {accuracy :.2f}%')
+        # Save the model out to a file 
+        torch.save({
+            'epoch':epoch,
+            'model_state_dict':cnn.state_dict(),
+            'optimizer_state_dict':optimizer.state_dict(),
+        },f"{MODEL_FOLDER}/e{epoch+1}_b{BATCH_SIZE}_a{int(accuracy)}.pt")
+        # Reset the model to training mode    
+        cnn.train()
 
-    torch.save({
-                'epoch':epoch,
-                'model_state_dict':cnn.state_dict(),
-                'optimizer_state_dict':optimizer.state_dict(),
-                'loss':loss,
-            },f"{MODEL_FOLDER}/final.pt")
+
     print('Finished Training')
