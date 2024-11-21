@@ -10,7 +10,8 @@ import os
 
 EPOCH=int(sys.argv[1])
 BATCH_SIZE=int(sys.argv[2])
-MODEL_FOLDER=sys.argv[3]
+LR=float(sys.argv[3])
+MODEL_FOLDER=sys.argv[4]
 
 os.makedirs(MODEL_FOLDER,exist_ok=True)
 
@@ -45,7 +46,7 @@ if __name__=="__main__":
     cnn.to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(cnn.parameters(), lr=0.001, momentum=0.9)
+    optimizer = optim.Adam(cnn.parameters(), lr=LR)
 
     # Set model to train mode
     cnn.train()
